@@ -10,6 +10,7 @@
   "author": "",
   "license": "SEE LICENSE IN LICENSE.txt",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.290.0"
+    "@aws-sdk/client-s3": "^3.290.0",
+    "minimist": "^1.2.8"
   }
 }
