@@ -11,6 +11,8 @@
   "license": "SEE LICENSE IN LICENSE.txt",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.290.0",
-    "minimist": "^1.2.8"
+    "@aws-sdk/client-sqs": "^3.303.0",
+    "minimist": "^1.2.8",
+    "npm": "^9.6.3"
   }
 }

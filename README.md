@@ -15,34 +15,48 @@ copy vantaTags-template.js vantaTags.js
 vim vantaTags.js
 ```
 
-# Usage for S3 Resources
+# Update your S3 Resources
 
 See the options available:
 ```shell
-node updateS3Tags.js --help
+node updateTags.js --help
 ```
 See the buckets that aren't tagged in `eu-central-1`. This will also warn you about buckets in other regions that aren't covered.
 ```shell
-node updateS3Tags.js --region eu-central-1
+node updateTags.js --service S3 --region eu-central-1
 ```
 
 See the buckets in `eu-central-1` that include the text `"codepipeline"` (but don't have Vanta tags). This will also warn you about buckets in other regions that match this text but wouldn't be updated.
 ```shell
-node updateS3Tags.js --region eu-central-1 --include "codepipeline"
+node updateTags.js --service S3 --region eu-central-1 --include "codepipeline"
 ```
 
 Add a description for these buckets (but stil execute as a dry run).
 ```shell
-node updateS3Tags.js --region eu-central-1 \
+node updateTags.js --service S3 --region eu-central-1 \
   --description "Used for storing artifacts to update our build system." \
   --include codepipeline
 ```
 Update the S3 buckets that match codepipeline with the new tags.
 ```shell
-node updateS3Tags.js --region eu-central-1 \
+node updateTags.js --service S3 --region eu-central-1 \
   --description "Used for storing artifacts to update our build system." \
   --include codepipeline
   --no-dry-run
 ```
 
+# Update your SQS Resources
+
+See the queues in `eu-central-1` that include the text `"codepipeline"` (but don't have Vanta tags).
+```shell
+node updateTags.js --service S3 --region eu-central-1 --include "codepipeline"
+```
+
+Update the tags on SQS queues that match `codepipeline` with the new tags.
+```shell
+node updateTags.js --service S3 --region eu-central-1 \
+  --description "Used for storing artifacts to update our build system." \
+  --include codepipeline
+  --no-dry-run
+```
 **NOTE:** You currently have to run this utility for each region separately. Again, PRs are welcome.
