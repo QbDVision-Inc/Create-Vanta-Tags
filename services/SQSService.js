@@ -2,7 +2,6 @@
 
 const {SQSClient, TagQueueCommand, ListQueueTagsCommand, ListQueuesCommand} = require("@aws-sdk/client-sqs");
 const {BaseService} = require("./BaseService");
-const {ListFunctionsCommand} = require("@aws-sdk/client-lambda");
 
 /**
  * This class is the base class that takes care of tagging SQS Queues.
