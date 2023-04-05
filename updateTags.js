@@ -2,6 +2,9 @@ const minimist = require('minimist');
 const {VantaTags} = require("./vantaTags");
 const {S3Service} = require("./services/S3Service");
 const {SQSService} = require("./services/SQSService");
+const {LambdaService} = require("./services/LambdaService");
+const {ECSService} = require("./services/ECSService");
+const {ECRService} = require("./services/ECRService");
 
 // Parse command line arguments
 const cliArguments = minimist(process.argv.slice(2));
@@ -41,6 +44,15 @@ async function main() {
         case "SQS":
           service = new SQSService(region);
           break;
+        case "LAMBDA":
+          service = new LambdaService(region);
+          break;
+        case "ECS":
+          service = new ECSService(region);
+          break;
+        case "ECR":
+          service = new ECRService(region);
+          break;
         default:
           console.error(`Service ${cliArguments.service} not supported. PRs are encouraged :-).`);
           process.exit(1);
@@ -72,7 +84,7 @@ async function main() {
 
           let hasTag = false;
           if (Array.isArray(tags)) {
-            hasTag = tags.some(tag => tag.Key === "VantaOwner");
+            hasTag = tags.some(tag => tag.Key === "VantaOwner" || tag.key === "VantaOwner");
           } else if (tags) {
             for (const tagKey in tags) {
               if (tagKey === "VantaOwner") {
@@ -101,11 +113,13 @@ async function main() {
 
     for (const item of itemsWithoutTags) {
       console.log(`Loading tags for ${service.getItemName(item)}...`);
-      let tags = [];
-      try {
-        tags = await service.listTagsOnItem(item);
-      } catch (err) {
-        // Ignore if there aren't any tags.
+      let tags = null;
+      if (service.shouldIncludeExistingTags()) {
+        try {
+          tags = await service.listTagsOnItem(item);
+        } catch (err) {
+          // Ignore if there aren't any tags.
+        }
       }
 
       tags = await service.combineTagsAndVantaTags(tags, VantaTags);

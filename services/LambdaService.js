@@ -1,50 +1,55 @@
 "use strict";
 
-const {SQSClient, TagQueueCommand, ListQueueTagsCommand, ListQueuesCommand} = require("@aws-sdk/client-sqs");
+const {
+  LambdaClient,
+  ListFunctionsCommand,
+  ListTagsCommand,
+  TagResourceCommand,
+} = require("@aws-sdk/client-lambda");
+
 const {BaseService} = require("./BaseService");
-const {ListFunctionsCommand} = require("@aws-sdk/client-lambda");
 
 /**
- * This class is the base class that takes care of tagging SQS Queues.
+ * This class is the base class that takes care of tagging Lambdas.
  */
-class SQSService extends BaseService {
+class LambdaService extends BaseService {
   constructor(region) {
     super(region);
-    this.sqsClient = new SQSClient({region});
+    this.lambdaClient = new LambdaClient({region});
   }
 
   async listItems() {
     let nextMarker = null;
-    let allQueues = [];
+    let allFunctions = [];
     do {
-      let input = nextMarker ? {NextToken: nextMarker} : {};
-      const {QueueUrls, NextToken} = await this.sqsClient.send(new ListQueuesCommand(input));
-      allQueues = allQueues.concat(QueueUrls);
-      console.log("Received next token:", NextToken, "URLs:", QueueUrls);
-      if (NextToken) {
-        nextMarker = NextToken;
+      let input = nextMarker ? {Marker: nextMarker} : {};
+      const {Functions, NextMarker} = await this.lambdaClient.send(
+        new ListFunctionsCommand(input));
+      allFunctions = allFunctions.concat(Functions);
+      if (NextMarker) {
+        nextMarker = NextMarker;
       } else {
         nextMarker = null;
       }
     } while (nextMarker)
-    return allQueues;
+    return allFunctions;
   }
 
   doesItemInclude(item, someString) {
-    return item.includes(someString);
+    return item.FunctionName.includes(someString);
   }
 
   async listTagsOnItem(item) {
-    const {Tags} = await this.sqsClient.send(new ListQueueTagsCommand({QueueUrl: item}));
+    const {Tags} = await this.lambdaClient.send(new ListTagsCommand({Resource: item.FunctionArn}));
     return Tags;
   }
 
   getItemName(item) {
-    return item;
+    return item.FunctionName;
   }
 
   shouldIncludeExistingTags() {
-    return true;
+    return false;
   }
 
   /**
@@ -67,8 +72,8 @@ class SQSService extends BaseService {
    * @param item An item returned from listItems
    */
   async setTagsOnItem(tags, item) {
-    await this.sqsClient.send(new TagQueueCommand({
-      QueueUrl: item,
+    await this.lambdaClient.send(new TagResourceCommand({
+      Resource: item.FunctionArn,
       Tags: tags,
     }));
   }
@@ -80,4 +85,4 @@ class SQSService extends BaseService {
   }
 }
 
-module.exports.SQSService = SQSService;
+module.exports.LambdaService = LambdaService;

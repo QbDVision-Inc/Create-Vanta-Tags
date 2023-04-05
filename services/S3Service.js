@@ -36,14 +36,18 @@ class S3Service extends BaseService {
     return item.Name;
   }
 
+  shouldIncludeExistingTags() {
+    return true;
+  }
+
   /**
    * Just add the vanta tags to the set of tags returned by `listTagsOnItem`. Unfortunately not all AWS services return
    * tags in the same format :-(.
-   * @param tags The tags from from listTagsOnItem()
+   * @param tags The tags from from listTagsOnItem(), possibly null or undefined
    * @param vantaTags The tags from vantaTags.js (in the format of vantaTags-template.js).
    */
   combineTagsAndVantaTags(tags, vantaTags) {
-    return [...tags, ...vantaTags];
+    return [...(tags || []), ...vantaTags];
   }
 
   /**

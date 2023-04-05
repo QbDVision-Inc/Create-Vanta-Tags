@@ -33,11 +33,18 @@ class BaseService {
     throw new Error("Implement this method on your service.");
   }
 
+  /**
+   * @returns {boolean} True if this service expects to see all tags, or false if only new tags should be included.
+   */
+  shouldIncludeExistingTags() {
+    return true;
+  }
+
   // noinspection JSUnusedLocalSymbols
   /**
    * Just add the vanta tags to the set of tags returned by `listTagsOnItem`. Unfortunately not all AWS services return
    * tags in the same format :-(.
-   * @param tags The object returned by `listTagsOnItem`.
+   * @param tags The tags from from listTagsOnItem(), possibly null or undefined
    * @param vantaTags The tags from vantaTags.js (in the format of vantaTags-template.js).
    */
   combineTagsAndVantaTags(tags, vantaTags) {
