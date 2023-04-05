@@ -34,7 +34,7 @@ async function main() {
       process.exit(1);
     } else {
       const region = cliArguments.region || "us-east-1";
-      switch (cliArguments.service.trim()) {
+      switch (cliArguments.service.trim().toUpperCase()) {
         case "S3":
           service = new S3Service(region);
           break;
@@ -87,9 +87,9 @@ async function main() {
         } catch (err) {
           if (err.name === 'PermanentRedirect') {
             const location = await service.getLocation(item);
-            console.log(`Skipping ${item.Name} because it is in: ${location || "us-east-1"}`);
+            console.log(`Skipping ${service.getItemName(item)} because it is in: ${location || "us-east-1"}`);
           } else if (err.name === 'NoSuchTagSet') {
-            itemsWithoutTags.push(item.Name);
+            itemsWithoutTags.push(item);
           } else {
             console.error(err);
           }
@@ -97,25 +97,26 @@ async function main() {
       }
     }
 
-    console.log(`Items to be updated: \n  - ${itemsWithoutTags.join('\n  - ')}`);
+    console.log(`Items to be updated: \n  - ${itemsWithoutTags.map(item => service.getItemName(item)).join('\n  - ')}`);
 
     for (const item of itemsWithoutTags) {
-      console.log(`Loading tags for ${item}...`);
-      let tags;
+      console.log(`Loading tags for ${service.getItemName(item)}...`);
+      let tags = [];
       try {
         tags = await service.listTagsOnItem(item);
       } catch (err) {
         // Ignore if there aren't any tags.
       }
 
+      tags = await service.combineTagsAndVantaTags(tags, VantaTags);
+
       if (cliArguments["dry-run"] !== false) {
-        tags = await service.combineTagsAndVantaTags(tags, VantaTags);
         console.log(`Dry Run: Tags for ${service.getItemName(item)} would have been updated to:`, tags);
       } else {
         console.log(`Updating tags for ${service.getItemName(item)}...`);
 
         await service.setTagsOnItem(tags, item);
-        console.log(`Successfully updated tags for ${item}`);
+        console.log(`Successfully updated tags for ${service.getItemName(item)}.`);
       }
     }
   } catch (err) {

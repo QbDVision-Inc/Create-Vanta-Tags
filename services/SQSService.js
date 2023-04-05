@@ -1,13 +1,14 @@
 "use strict";
 
 const {SQSClient, TagQueueCommand, ListQueueTagsCommand, ListQueuesCommand} = require("@aws-sdk/client-sqs");
+const {BaseService} = require("./BaseService");
 
 /**
  * This class is the base class that takes care of tagging SQS Queues.
  */
-class SQSService {
+class SQSService extends BaseService {
   constructor(region) {
-    this.region = region;
+    super(region);
     this.sqsClient = new SQSClient({region});
   }
 

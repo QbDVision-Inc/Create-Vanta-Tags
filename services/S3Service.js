@@ -7,13 +7,14 @@ const {
   ListBucketsCommand,
   GetBucketLocationCommand
 } = require("@aws-sdk/client-s3");
+const {BaseService} = require("./BaseService");
 
 /**
  * This class is the base class that takes care of tagging S3 buckets.
  */
-class S3Service {
+class S3Service extends BaseService {
   constructor(region) {
-    this.region = region;
+    super(region);
     this.s3Client = new S3Client({region});
   }
 
